@@ -37,7 +37,7 @@ class DemandeDevis extends Module
         $this->name = 'demandeDevis';
         $this->tab = 'others';
         $this->version = '1.0.0';
-        $this->author = 'smartwoed';
+        $this->author = 'smartworld';
         $this->need_instance = 1;
 
         /**

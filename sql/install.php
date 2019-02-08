@@ -27,7 +27,22 @@ $sql = array();
 
 $sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'demandeDevis` (
     `id_demandeDevis` int(11) NOT NULL AUTO_INCREMENT,
+    `id_client` int(11) NOT NULL,
+    `id_reponse_question` int(11) NOT NULL,
+    `prix_total` float,
     PRIMARY KEY  (`id_demandeDevis`)
+) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
+$sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'demandeDevisQuestionaire` (
+    `id_questionnaireDevis` int(11) NOT NULL AUTO_INCREMENT,
+    `id_produit` int(11) NOT NULL,
+    `libelle` varchar(255) DEFAULT NULL,
+    PRIMARY KEY  (`id_questionnaireDevis`)
+) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
+$sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'demandeDevisReponse` (
+    `id_reponse_question` int(11) NOT NULL AUTO_INCREMENT,
+    `id_questionnaireDevis` int(11) NOT NULL,
+    `libelle` varchar(255) DEFAULT NULL,
+    PRIMARY KEY  (`id_reponse_question`)
 ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
 
 foreach ($sql as $query) {
