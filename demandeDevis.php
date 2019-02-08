@@ -94,7 +94,7 @@ class DemandeDevis extends Module
 
         $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
 
-        return $output.$this->renderForm();
+        return $output.$this->renderList();
     }
 
     /**
@@ -124,7 +124,69 @@ class DemandeDevis extends Module
 
         return $helper->generateForm(array($this->getConfigForm()));
     }
+    protected function renderList(){
+        $this->fields_list          = array();
+        $this->fields_list['id_demandeDevis'] = array(
+            'title' => $this->l('id'),
+            'type' => 'text',
+            'search' => false,
+            'orderby' => false
+        );
+        $this->fields_list['prix_total'] = array(
+            'title' => $this->l('Prix Total'),
+            'type' => 'text',
+            'search' => false,
+            'orderby' => false
+        );
+        $this->fields_list['client'] = array(
+            'title' => $this->l('Client'),
+            'type' => 'text',
+            'search' => false,
+            'orderby' => false
+        );
+        $helper = new HelperList();
+        $helper->shopLinkType   = '';
+        $helper->simple_header      = false;
+        $helper->identifier         = 'id_qa';
+        $helper->actions            = array(
+            'edit',
+            'delete'
+        );
+        $helper->show_toolbar       = true;
+        $helper->imageType          = 'jpg';
+        $helper->toolbar_btn['new'] = array(
+            'href' => AdminController::$currentIndex . '&configure=' . $this->name . '&add' . $this->name . '&token='
+                . Tools::getAdminTokenLite('AdminModules'),
+            'desc' => $this->l('Add new')
+        );
 
+        $helper->title        = $this->displayName;
+        $helper->table        = $this->name;
+        $helper->token        = Tools::getAdminTokenLite('AdminModules');
+        $helper->currentIndex = AdminController::$currentIndex . '&configure=' . $this->name;
+
+        $content = $this->getListContent($this->context->language->id);
+
+        return $helper->generateList($content, $this->fields_list);
+    }
+    protected function getListContent($id_lang = null)
+    {
+        if (is_null($id_lang))
+            $id_lang = (int) Configuration::get('PS_LANG_DEFAULT');
+
+        $sql = 'SELECT d.`id_demandeDevis`, d.`prix_total`, d.`id_reponse_question`
+            FROM `' . _DB_PREFIX_ . 'demandeDevis`d
+            WHERE `id_lang` = ' . (int) $id_lang ;
+
+
+        $content = Db::getInstance()->executeS($sql);
+
+       /* foreach ($content as $key => $value) {
+            $content[$key]['question'] = substr(strip_tags($value['question']), 0, 200);
+        }*/
+
+        return $content;
+    }
     /**
      * Create the structure of your form.
      */
