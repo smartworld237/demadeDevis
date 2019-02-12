@@ -25,11 +25,81 @@
 * Don't forget to prefix your containers with your own identifier
 * to avoid any conflicts with others containers.
 */
-alert("text2");
 $(document).ready(function () {
+    var $searchWidget = $('#url');
+    //var $searchBox    = $("select[class=dd_select]", $element).val()
+    var searchURL     = $searchWidget.attr('data-search-controller-url');
+    getQuestion(3);
+    $('.dd_select').on('change',function(){
+        var $searchBox    = $(".dd_select").val();
+        //$( this ).val();
+        //alert($searchBox);
+       // $('.contener').append('<div>hello</div>');
+        $.ajax({
+            url : searchURL,
+            type : 'GET',
+            dataType : 'json',
+            data:{
+                action_name:'action_name',
+                id_product:$searchBox
+            },
+            success : function(resultat, statut){ // success est toujours en place, bien sûr !
+                console.log(resultat);
+                $( ".question" ).remove();
+                $.each( resultat, function( index, value ){
+               getQuestion(value.id_questionnaireDevis);
+                    $('.contener').append('</br><div class="col-md-6 question" id="quest'+value.id_questionnaireDevis+'">'+value.libelle+'</div>');
+                                                  // Append the text to <h1>
+                });
+            },
+
+            error : function(resultat, statut, erreur){
+
+            }
+
+        });
+    });
+    function getQuestion(question){
+        $.ajax({
+            url : searchURL,
+            type : 'GET',
+            dataType : 'json',
+            data:{
+                    action_reponse:'action_reponse',
+                    id_question:question
+                },
+            success : function(resultats, statut){ // success est toujours en place, bien sûr !
+                console.log(resultats);
+                /*$.each( resultats, function( index, value ){
+                    $('.contener').append('</br><div class="col-md-6 reponse" id="reponse'+value.id_questionnaireDevis+'">'+value.libelle+'</div>');
+                    // Append the text to <h1>
+                });*/
+            },
+
+            error : function(resultat, statut, erreur){
+
+            }
+
+        });
+    }
     $('.js-hide-modal1').on('click',function(){
-        $('.h3').addClass('hide');
-        alert("text");
+        /*$('.h3').addClass('hide');*/
+        //alert(searchURL);
+        $.ajax({
+            url : searchURL,
+            type : 'GET',
+            dataType : 'json',
+            data:'action_name',
+            success : function(resultat, statut){ // success est toujours en place, bien sûr !
+                console.log(resultat);
+               // swal(nameProduct, "is added to cart !", "success");
+            },
+
+            error : function(resultat, statut, erreur){
+
+            }
+
+        });
     });
     $('.test').each(function(){
         $(this).on('click', function(){
@@ -55,7 +125,7 @@ $(document).ready(function () {
 
         });
     });
-    $searchBox.psBlockSearchAutocomplete({
+    /*$searchBox.psBlockSearchAutocomplete({
         source: function (query, response) {
             $.post(searchURL, {
                 s: query.term,
@@ -70,5 +140,5 @@ $(document).ready(function () {
             var url = ui.item.url;
             window.location.href = url;
         },
-    });
+    });*/
 });

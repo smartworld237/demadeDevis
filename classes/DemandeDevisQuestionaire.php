@@ -21,4 +21,19 @@ class DemandeDevisQuestionaire extends ObjectModel
         ),
 
     );
+    public static function getQuestionnaireByProduit($produit,$id_lang){
+        //$id_lang = (int) Configuration::get('PS_LANG_DEFAULT');
+        $sql = 'SELECT d.`id_questionnaireDevis`, dl.`libelle`
+            FROM `' . _DB_PREFIX_ . 'demandeDevisQuestionaire`d
+            LEFT JOIN `' . _DB_PREFIX_ . 'product` p ON (p.`id_product` = d.`id_produit`)
+            LEFT JOIN '._DB_PREFIX_.'demandeDevisQuestionaire_lang dl ON (d.id_questionnaireDevis = dl.id_questionnaireDevis)
+           where dl.id_lang = '.$id_lang.' and p.id_product ='.$produit;
+        $sql1='SELECT *
+            FROM `' . _DB_PREFIX_ . 'demandeDevisQuestionaire`';
+
+
+        $content = Db::getInstance()->executeS($sql);
+
+        return $content;
+}
 }

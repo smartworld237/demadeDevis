@@ -21,4 +21,18 @@ class DemandeDevisReponseQuestionnaire extends ObjectModel
         ),
 
     );
+    public static function getReponseByQuestion($question,$id_lang){
+        //$id_lang = (int) Configuration::get('PS_LANG_DEFAULT');
+        $sql = 'SELECT d.`id_reponse_question`, dl.`libelle`
+            FROM `' . _DB_PREFIX_ . 'demandeDevisReponse`d
+            LEFT JOIN '._DB_PREFIX_.'demandeDevisReponse_lang`dl` ON (d.`id_reponse_question` = dl.`id_reponse_question`)
+           where dl.id_lang ='.$id_lang.' and d.id_questionnaireDevis='.$question ;
+        $sql1 = 'SELECT *
+            FROM ' . _DB_PREFIX_ . 'demandeDevisReponse';
+
+
+        $content = Db::getInstance()->executeS($sql);
+
+        return $content;
+    }
 }

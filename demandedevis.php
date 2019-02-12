@@ -530,7 +530,8 @@ class DemandeDevis extends Module
             $id_lang = (int) Configuration::get('PS_LANG_DEFAULT');
 
         $sql = 'SELECT d.`id_questionnaireDevis`, dl.`libelle`, d.`id_produit`, pl.`name` as name
-            FROM `' . _DB_PREFIX_ . 'demandeDevisQuestionaire`d LEFT JOIN `' . _DB_PREFIX_ . 'product` p ON (p.`id_product` = d.`id_produit`)
+            FROM `' . _DB_PREFIX_ . 'demandeDevisQuestionaire`d 
+            LEFT JOIN `' . _DB_PREFIX_ . 'product` p ON (p.`id_product` = d.`id_produit`)
             LEFT JOIN '._DB_PREFIX_.'demandeDevisQuestionaire_lang dl ON (d.id_questionnaireDevis = dl.id_questionnaireDevis)
             LEFT JOIN '._DB_PREFIX_.'product_lang pl ON (p.id_product = pl.id_product) where pl.id_lang =dl.id_lang and pl.id_lang = '.$id_lang;
 
@@ -552,7 +553,8 @@ class DemandeDevis extends Module
             FROM `' . _DB_PREFIX_ . 'demandeDevisReponse`d
              LEFT JOIN '._DB_PREFIX_.'demandeDevisReponse_lang `dl` ON (d.`id_reponse_question` = dl.`id_reponse_question`)
              LEFT JOIN '._DB_PREFIX_.'demandeDevisQuestionaire `q` ON (d.`id_questionnaireDevis` = q.`id_questionnaireDevis`)
-               LEFT JOIN '._DB_PREFIX_.'demandeDevisQuestionaire_lang ql ON (q.id_questionnaireDevis = ql.id_questionnaireDevis) where ql.id_lang = dl.id_lang =  ql.id_lang ='.$id_lang ;
+             LEFT JOIN '._DB_PREFIX_.'demandeDevisQuestionaire_lang ql ON (q.id_questionnaireDevis = ql.id_questionnaireDevis)
+             where ql.id_lang = dl.id_lang and  dl.id_lang ='.$id_lang ;
 
 
         $content = Db::getInstance()->executeS($sql);
@@ -699,7 +701,7 @@ class DemandeDevis extends Module
     }
     /**
     * Add the CSS & JavaScript files you want to be loaded in the BO.
-    */
+     */
     public function hookBackOfficeHeader()
     {
         if (Tools::getValue('module_name') == $this->name) {
@@ -719,7 +721,7 @@ class DemandeDevis extends Module
 
     public function hookDisplayHome()
     {
-        $this->context->controller->addJS($this->_path.'/views/js/front.js');
-        $this->context->controller->addCSS($this->_path.'/views/css/front.css');
-    }/**/
+    /*    $this->context->controller->addJS($this->_path.'/views/js/front.js');
+        $this->context->controller->addCSS($this->_path.'/views/css/front.css');*/
+    }
 }

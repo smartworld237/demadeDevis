@@ -24,45 +24,35 @@
 *}
 {extends file='page.tpl'}
 {block name='content'}
-  <div class="container">
+  <br class="container" id="url" data-search-controller-url="{$devis_controller_url}">
     <header>
           <h1 class="h3">{l s='Send a Devis' d='Modules.demandedevis'}</h1>
           <p>{l s='If you would like to add a comment about your order, please write it in the field below.' d='Modules.Contactform.Shop'}</p>
       </header> {* *}
       <button name="submitNewsletter" class="js-hide-modal1 btn btn-success" > text</button>
         <form action="{$urls.pages.index}" method="post">
-            <div class="form-group">
-                <label for="email">{l s='Order reference' d='Modules.Contactform.Shop'}</label>
-                <select name="id_order">
-                    <option value="">{l s='Select reference' d='Modules.Contactform.Shop'}</option>
+            <div class="form-group contener">
+                <label for="email" class="col-md-2 control-label">{l s='Product' d='Modules.demandedevis'}</label>
+                <div class="col-md-6">
+                <select name="id_order" class="dd_select">
+                    <option value="">{l s='Select reference' d='Modules.demandedevis'}</option>
                     {foreach from=$orders item=order}
                         <option value="{$order.id_product}">{$order.name}</option>
                     {/foreach}
-                </select>
+                </select></div>
             </div>
+{*            <div class="form-group">
+                <label for="city" class="col-md-4 control-label">Ville :</label>
+                <div class="col-md-6">
+                    <select name="question" id="question" class="form-control"></select>
+                </div>
+            </div>*}
             {*<input type="text" name="email" value="{$value}" placeholder="{l s='Your e-mail' d='Modules.Emailsubscription.Shop'}" />
-          *}  {if $conditions}
-                <p>{$conditions}</p>
-            {/if}
+          *}
            {* <input type="submit" value="ok" name="submitNewsletter" class="test btn btn-success" />*}
 
             <input type="hidden" name="action" value="0" />
         </form>
+  </br> </br> </br> </br> </br> </br>
     </div>
-    <script type="text/javascript">
-    {literal}
-    $('.js-hide-modal1').on('click',function(){
-        $('.h3').addClass('hide');
-        alert("text");
-    });
-   /* $(document).ready(function()
-    {
-        alert("text");
-        $('.js-hide-modal1').on('click',function(){
-            $('.h3').addClass('hide');
-            alert("text");
-        });
-    });*/
-    {/literal}
-</script>
 {/block}
