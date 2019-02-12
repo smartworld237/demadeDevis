@@ -25,3 +25,50 @@
 * Don't forget to prefix your containers with your own identifier
 * to avoid any conflicts with others containers.
 */
+alert("text2");
+$(document).ready(function () {
+    $('.js-hide-modal1').on('click',function(){
+        $('.h3').addClass('hide');
+        alert("text");
+    });
+    $('.test').each(function(){
+        $(this).on('click', function(){
+            alert("text");
+         /*   $.ajax({
+                url : '',
+                type : 'POST',
+                dataType : 'json',
+                data:{
+                    quantity:$('.num-product').val(),
+                    name:nameProduct
+                },
+                success : function(resultat, statut){ // success est toujours en place, bien sûr !
+                    console.log(resultat);
+                    swal(nameProduct, "is added to cart !", "success");
+                },
+
+                error : function(resultat, statut, erreur){
+
+                }
+
+            });*/
+
+        });
+    });
+    $searchBox.psBlockSearchAutocomplete({
+        source: function (query, response) {
+            $.post(searchURL, {
+                s: query.term,
+                resultsPerPage: 10
+            }, null, 'json')
+                .then(function (resp) {
+                    response(resp.products);
+                })
+                .fail(response);
+        },
+        select: function (event, ui) {
+            var url = ui.item.url;
+            window.location.href = url;
+        },
+    });
+});

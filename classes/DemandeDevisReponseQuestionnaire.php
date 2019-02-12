@@ -8,7 +8,6 @@
 
 class DemandeDevisReponseQuestionnaire extends ObjectModel
 {
-    public $libelle;
     public $id_questionnaireDevis;
     public $id_reponse_question;
     public static $definition = array(
@@ -18,7 +17,7 @@ class DemandeDevisReponseQuestionnaire extends ObjectModel
         'fields' => array(
             'id_questionnaireDevis' =>array('type' => self::TYPE_NOTHING, 'validate' => 'isUnsignedId'),
             // Lang fields
-            'libelle' => array('type' => self::TYPE_STRING)
+            'libelle' => array('type' => self::TYPE_STRING,'lang' => true)
         ),
 
     );

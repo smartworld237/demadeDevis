@@ -27,18 +27,20 @@
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-
+require_once _PS_MODULE_DIR_ . 'demandedevis/classes/DemandeDevisQuestionaire.php';
+require_once _PS_MODULE_DIR_ . 'demandedevis/classes/DemandeDevisReponseQuestionnaire.php';
 class DemandeDevis extends Module
 {
     protected $config_form = false;
-
+    private $html = '';
     public function __construct()
     {
-        $this->name = 'demandeDevis';
+        $this->name = 'demandedevis';
         $this->tab = 'others';
         $this->version = '1.0.0';
         $this->author = 'smartworld';
-        $this->need_instance = 1;
+        $this->need_instance = 0;
+        $this->controllers = array('devis');
 
         /**
          * Set $this->bootstrap to true if your module is compliant with bootstrap (PrestaShop 1.6)
@@ -89,18 +91,38 @@ class DemandeDevis extends Module
         if (((bool)Tools::isSubmit('submitDemandeDevisModule')) == true) {
             $this->postProcess();
         }
+        $output = '';
 
         $this->context->smarty->assign('module_dir', $this->_path);
 
-        $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
+     /*   $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
 
-        return $output.$this->renderList();
+        return $output.$this->renderList();*/
+        if (Tools::isSubmit('savequestionDevis')) {
+                return $this->processSaveQuestion();
+        } elseif (Tools::isSubmit('updatequestionDevis') || Tools::isSubmit('addquestionDevis')) {
+            $this->html .= $this->renderForm();
+            return $this->html;
+        } else if (Tools::isSubmit('deletequestionDevis')) {
+            Tools::redirectAdmin(AdminController::$currentIndex . '&configure=' . $this->name . '&token=' .
+                Tools::getAdminTokenLite('AdminModules'));
+        } elseif (Tools::isSubmit('savereponseDevis')) {
+            $this->html .= $this->processSaveReponse();
+        } elseif (Tools::isSubmit('updatereponseDevis') || Tools::isSubmit('addreponseDevis')) {
+            $this->html .= $this->renderFormDevis();
+            return $this->html;
+        } else {
+            //$this->html .= $this->renderList();
+            $output .= $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
+            //return $this->html;
+            return $output . $this->renderList(). $this->renderListQuestion().$this->renderListReponse();
+        }
     }
 
     /**
      * Create the form that will be displayed in the configuration of your module.
      */
-    protected function renderForm()
+    protected function renderFormR()
     {
         $helper = new HelperForm();
 
@@ -123,6 +145,230 @@ class DemandeDevis extends Module
         );
 
         return $helper->generateForm(array($this->getConfigForm()));
+    }
+    public function getProduitList()
+    {
+        $hooks = array();
+            $id_lang = (int) Configuration::get('PS_LANG_DEFAULT');
+        $sql = 'SELECT  pl.`name` as name,p.`id_product`
+            FROM `' . _DB_PREFIX_ . 'product`p 
+            LEFT JOIN '._DB_PREFIX_.'product_lang pl ON (p.id_product = pl.id_product) where pl.id_lang = '.$id_lang;
+
+
+        $content = Db::getInstance()->executeS($sql);
+        foreach ($content as $row=>$hook) {
+            $hooks[$row]['key'] = $hook['id_product'];
+            $hooks[$row]['name'] = $hook['name'];
+        }
+        //return $content;
+        return $hooks;
+    }
+    public function getQuestionList()
+    {
+        $hooks = array();
+        $id_lang = (int) Configuration::get('PS_LANG_DEFAULT');
+        $sql = 'SELECT  pl.`libelle` as name,p.`id_questionnaireDevis`
+            FROM `' . _DB_PREFIX_ . 'demandeDevisquestionaire`p 
+            LEFT JOIN '._DB_PREFIX_.'demandeDevisquestionaire_lang pl ON (p.id_questionnaireDevis = pl.id_questionnaireDevis) where pl.id_lang = '.$id_lang;
+
+
+        $content = Db::getInstance()->executeS($sql);
+        foreach ($content as $row=>$hook) {
+            $hooks[$row]['key'] = $hook['id_questionnaireDevis'];
+            $hooks[$row]['name'] = $hook['name'];
+        }
+        //return $content;
+        return $hooks;
+    }
+    protected function renderForm()
+    {
+        $default_lang = (int) Configuration::get('PS_LANG_DEFAULT');
+        $produts = $this->getProduitList();
+        $fields_form = array(
+            'tinymce' => true,
+            'legend' => array(
+                'title' => $this->l('New Questionnaire product')
+            ),
+            'input' => array(
+                'id_questionnaireDevis' => array(
+                    'type' => 'hidden',
+                    'name' => 'id_questionnaireDevis'
+                ),
+                array(
+                    'type'    => 'select',
+                    'label'   => $this->l('Select Produit'),
+                    'name'    => 'id_produit',
+                    'hint'    => $this->l('Select Produit'),
+                    'options' => array(
+                        'query' => $produts,
+                        'id'    => 'key',
+                        'name'  => 'name'
+                    )
+                ),
+                array(
+                    'type' => 'text',
+                    'lang' => true,
+                    'label' => $this->l('Question:'),
+                    'name' => 'libelle',
+                    'required' => true
+                )
+            ),
+            'submit' => array(
+                'title' => $this->l('Save'),
+                'name'=>'savequestionDevis'
+            ),
+            'buttons' => array(
+                array(
+                    'href' => AdminController::$currentIndex . '&configure=' . $this->name . '&token=' . Tools::getAdminTokenLite('AdminModules'),
+                    'title' => $this->l('Back to list'),
+                    'icon' => 'process-icon-back'
+                )
+            )
+        );
+
+        $helper                  = new HelperForm();
+        $helper->module          = $this;
+        //$helper->name_controller = 'faq';
+        $helper->identifier      = $this->identifier;
+        $helper->token           = Tools::getAdminTokenLite('AdminModules');
+        foreach (Language::getLanguages(false) as $lang)
+            $helper->languages[] = array(
+                'id_lang' => $lang['id_lang'],
+                'iso_code' => $lang['iso_code'],
+                'name' => $lang['name'],
+                'is_default' => ($default_lang == $lang['id_lang'] ? 1 : 0)
+            ); /**/
+
+        $helper->currentIndex             = AdminController::$currentIndex . '&configure=' . $this->name;
+        $helper->default_form_language    = $default_lang;
+        $helper->allow_employee_form_lang = $default_lang;/**/
+        $helper->toolbar_scroll           = true;
+        $helper->title                    = $this->displayName;
+        $helper->submit_action            = 'savequestionDevis';
+
+        $helper->fields_value = $this->getFormValues();
+
+        return $helper->generateForm(array(
+            array(
+                'form' => $fields_form
+            )
+        ));
+    }
+    protected function renderFormDevis()
+    {
+        $default_lang = (int) Configuration::get('PS_LANG_DEFAULT');
+        $questions = $this->getQuestionList();
+        $fields_form = array(
+            'tinymce' => true,
+            'legend' => array(
+                'title' => $this->l('New Reponse Questionnaire')
+            ),
+            'input' => array(
+                'id_reponse_question' => array(
+                    'type' => 'hidden',
+                    'name' => 'id_reponse_question'
+                ),
+                array(
+                    'type'    => 'select',
+                    'label'   => $this->l('Select Questionnaire'),
+                    'name'    => 'id_questionnaireDevis',
+                    'hint'    => $this->l('Select Questionnaire'),
+                    'options' => array(
+                        'query' => $questions,
+                        'id'    => 'key',
+                        'name'  => 'name'
+                    )
+                ),
+                array(
+                    'type' => 'text',
+                    'lang' => true,
+                    'label' => $this->l('Reponse:'),
+                    'name' => 'libelle',
+                    'required' => true
+                )
+            ),
+            'submit' => array(
+                'title' => $this->l('Save'),
+                'name'=>'savereponseDevis'
+            ),
+            'buttons' => array(
+                array(
+                    'href' => AdminController::$currentIndex . '&configure=' . $this->name . '&token=' . Tools::getAdminTokenLite('AdminModules'),
+                    'title' => $this->l('Back to list'),
+                    'icon' => 'process-icon-back'
+                )
+            )
+        );
+
+        $helper                  = new HelperForm();
+        $helper->module          = $this;
+        //$helper->name_controller = 'faq';
+        $helper->identifier      = $this->identifier;
+        $helper->token           = Tools::getAdminTokenLite('AdminModules');
+       foreach (Language::getLanguages(false) as $lang)
+            $helper->languages[] = array(
+                'id_lang' => $lang['id_lang'],
+                'iso_code' => $lang['iso_code'],
+                'name' => $lang['name'],
+                'is_default' => ($default_lang == $lang['id_lang'] ? 1 : 0)
+            ); /**/
+
+        $helper->currentIndex             = AdminController::$currentIndex . '&configure=' . $this->name;
+        $helper->default_form_language    = $default_lang;
+        $helper->allow_employee_form_lang = $default_lang;/**/
+        $helper->toolbar_scroll           = true;
+        $helper->title                    = $this->displayName;
+        $helper->submit_action            = 'savereponseDevis';
+
+        $helper->fields_value = $this->getFormValuesReponse();
+
+        return $helper->generateForm(array(
+            array(
+                'form' => $fields_form
+            )
+        ));
+    }
+    public function getFormValues()
+    {
+        $fields_value = array();
+        $id_questionnaireDevis        = (int) Tools::getValue('id_questionnaireDevis');
+        /*       $info                                             = new DemandeDevisQuestionaire((int) $id_questionnaireDevis);
+         $fields_value['libelle'] = $info->libelle;
+              $fields_value['id_produit']   = $info->id_produit;*/
+        foreach (Language::getLanguages(false) as $lang) {
+            if ($id_questionnaireDevis) {
+                $info                                             = new DemandeDevisQuestionaire((int) $id_questionnaireDevis);
+                $fields_value['libelle'][(int) $lang['id_lang']] = $info->libelle[(int) $lang['id_lang']];
+                $fields_value['id_produit']   = $info->id_produit;
+            } else {
+                $fields_value['libelle'][(int) $lang['id_lang']] = Tools::getValue('libelle_' . (int) $lang['id_lang'], '');
+                $fields_value['id_produit']   = Tools::getValue('id_produit');
+            }
+        }/**/
+
+        $fields_value['id_questionnaireDevis'] = (int) Tools::getValue('id_questionnaireDevis');
+
+        return $fields_value;
+    }
+    public function getFormValuesReponse()
+    {
+        $fields_value = array();
+        $id_reponse_question        = (int) Tools::getValue('id_reponse_question');
+
+        foreach (Language::getLanguages(false) as $lang) {
+            if ($id_reponse_question) {
+                $info                                             = new DemandeDevisReponseQuestionnaire((int) $id_reponse_question);
+                $fields_value['libelle'][(int) $lang['id_lang']] = $info->libelle[(int) $lang['id_lang']];
+                $fields_value['id_questionnaireDevis']   = $info->id_questionnaireDevis;
+            } else {
+                $fields_value['libelle'][(int) $lang['id_lang']] = Tools::getValue('libelle_' . (int) $lang['id_lang'], '');
+                $fields_value['id_questionnaireDevis']   = Tools::getValue('id_questionnaireDevis');
+            }
+        }/**/
+
+        $fields_value['id_reponse_question'] = (int) Tools::getValue('id_reponse_question');
+
+        return $fields_value;
     }
     protected function renderList(){
         $this->fields_list          = array();
@@ -147,18 +393,18 @@ class DemandeDevis extends Module
         $helper = new HelperList();
         $helper->shopLinkType   = '';
         $helper->simple_header      = false;
-        $helper->identifier         = 'id_qa';
+        $helper->identifier         = 'id_demandeDevis';
         $helper->actions            = array(
             'edit',
             'delete'
         );
         $helper->show_toolbar       = true;
         $helper->imageType          = 'jpg';
-        $helper->toolbar_btn['new'] = array(
+       /* $helper->toolbar_btn['new'] = array(
             'href' => AdminController::$currentIndex . '&configure=' . $this->name . '&add' . $this->name . '&token='
                 . Tools::getAdminTokenLite('AdminModules'),
             'desc' => $this->l('Add new')
-        );
+        )*/;
 
         $helper->title        = $this->displayName;
         $helper->table        = $this->name;
@@ -169,14 +415,105 @@ class DemandeDevis extends Module
 
         return $helper->generateList($content, $this->fields_list);
     }
+    protected function renderListQuestion(){
+        $this->fields_list          = array();
+        $this->fields_list['id_questionnaireDevis'] = array(
+            'title' => $this->l('id'),
+            'type' => 'text',
+            'search' => false,
+            'orderby' => false
+        );
+        $this->fields_list['libelle'] = array(
+            'title' => $this->l('Libelle'),
+            'type' => 'text',
+            'search' => false,
+            'orderby' => false
+        );
+        $this->fields_list['name'] = array(
+            'title' => $this->l('Product'),
+            'type' => 'text',
+            'search' => false,
+            'orderby' => false
+        );
+        $helper = new HelperList();
+        $helper->shopLinkType   = '';
+        $helper->simple_header      = false;
+        $helper->identifier         = 'id_questionnaireDevis';
+        $helper->actions            = array(
+            'edit',
+            'delete'
+        );
+        $helper->show_toolbar       = true;
+        $helper->imageType          = 'jpg';
+        $helper->toolbar_btn['new'] = array(
+           /* 'href' => AdminController::$currentIndex . '&configure=' . $this->name .'addquestionDevis' . '&token='
+                . Tools::getAdminTokenLite('AdminModules'),*/
+            'href' => AdminController::$currentIndex . '&configure=' . $this->name . '&addquestionDevis'. '&token='
+                . Tools::getAdminTokenLite('AdminModules'),
+            'desc' => $this->l('Add new')
+        );
+
+        $helper->title        = 'Questionnaire Devis';
+        $helper->table        = $this->name;
+        $helper->token        = Tools::getAdminTokenLite('AdminModules');
+        $helper->currentIndex = AdminController::$currentIndex . '&configure=' . $this->name;
+
+        $content = $this->getListContentQuestion($this->context->language->id);
+
+        return $helper->generateList($content, $this->fields_list);
+    }
+    protected function renderListReponse(){
+        $this->fields_list          = array();
+        $this->fields_list['id_reponse_question'] = array(
+            'title' => $this->l('id'),
+            'type' => 'text',
+            'search' => false,
+            'orderby' => false
+        );
+        $this->fields_list['libelle'] = array(
+            'title' => $this->l('Libelle'),
+            'type' => 'text',
+            'search' => false,
+            'orderby' => false
+        );
+        $this->fields_list['question'] = array(
+            'title' => $this->l('questionnaire'),
+            'type' => 'text',
+            'search' => false,
+            'orderby' => false
+        );
+        $helper = new HelperList();
+        $helper->shopLinkType   = '';
+        $helper->simple_header      = false;
+        $helper->identifier         = 'id_reponse_question';
+        $helper->actions            = array(
+            'edit',
+            'delete'
+        );
+        $helper->show_toolbar       = true;
+        $helper->imageType          = 'jpg';
+        $helper->toolbar_btn['new'] = array(
+            'href' => AdminController::$currentIndex . '&configure=' . $this->name . '&addreponseDevis'. '&token='
+                . Tools::getAdminTokenLite('AdminModules'),
+            'desc' => $this->l('Add new')
+        );
+
+        $helper->title        = 'Questionnaire Devis';
+        $helper->table        = $this->name;
+        $helper->token        = Tools::getAdminTokenLite('AdminModules');
+        $helper->currentIndex = AdminController::$currentIndex . '&configure=' . $this->name;
+
+        $content = $this->getListContentReponse($this->context->language->id);
+
+        return $helper->generateList($content, $this->fields_list);
+    }
     protected function getListContent($id_lang = null)
     {
         if (is_null($id_lang))
             $id_lang = (int) Configuration::get('PS_LANG_DEFAULT');
 
-        $sql = 'SELECT d.`id_demandeDevis`, d.`prix_total`, d.`id_reponse_question`
-            FROM `' . _DB_PREFIX_ . 'demandeDevis`d
-            WHERE `id_lang` = ' . (int) $id_lang ;
+        $sql = 'SELECT d.`id_demandeDevis`, d.`prix_total`, d.`id_reponse_question`, c.`firstname` as client
+            FROM `' . _DB_PREFIX_ . 'demandedevis`d LEFT JOIN `' . _DB_PREFIX_ . 'customer` c ON (d.`id_client` = c.`id_customer`) ' ;
 
 
         $content = Db::getInstance()->executeS($sql);
@@ -184,6 +521,45 @@ class DemandeDevis extends Module
        /* foreach ($content as $key => $value) {
             $content[$key]['question'] = substr(strip_tags($value['question']), 0, 200);
         }*/
+
+        return $content;
+    }
+    protected function getListContentQuestion($id_lang = null)
+    {
+        if (is_null($id_lang))
+            $id_lang = (int) Configuration::get('PS_LANG_DEFAULT');
+
+        $sql = 'SELECT d.`id_questionnaireDevis`, dl.`libelle`, d.`id_produit`, pl.`name` as name
+            FROM `' . _DB_PREFIX_ . 'demandeDevisQuestionaire`d LEFT JOIN `' . _DB_PREFIX_ . 'product` p ON (p.`id_product` = d.`id_produit`)
+            LEFT JOIN '._DB_PREFIX_.'demandeDevisQuestionaire_lang dl ON (d.id_questionnaireDevis = dl.id_questionnaireDevis)
+            LEFT JOIN '._DB_PREFIX_.'product_lang pl ON (p.id_product = pl.id_product) where pl.id_lang =dl.id_lang and pl.id_lang = '.$id_lang;
+
+
+        $content = Db::getInstance()->executeS($sql);
+
+        /* foreach ($content as $key => $value) {
+             $content[$key]['question'] = substr(strip_tags($value['question']), 0, 200);
+         }*/
+
+        return $content;
+    }
+    protected function getListContentReponse($id_lang = null)
+    {
+        if (is_null($id_lang))
+            $id_lang = (int) Configuration::get('PS_LANG_DEFAULT');
+
+        $sql = 'SELECT d.`id_reponse_question`, dl.`libelle`, d.`id_questionnaireDevis`, ql.`libelle` as question
+            FROM `' . _DB_PREFIX_ . 'demandeDevisReponse`d
+             LEFT JOIN '._DB_PREFIX_.'demandeDevisReponse_lang `dl` ON (d.`id_reponse_question` = dl.`id_reponse_question`)
+             LEFT JOIN '._DB_PREFIX_.'demandeDevisQuestionaire `q` ON (d.`id_questionnaireDevis` = q.`id_questionnaireDevis`)
+               LEFT JOIN '._DB_PREFIX_.'demandeDevisQuestionaire_lang ql ON (q.id_questionnaireDevis = ql.id_questionnaireDevis) where ql.id_lang = dl.id_lang =  ql.id_lang ='.$id_lang ;
+
+
+        $content = Db::getInstance()->executeS($sql);
+
+        /* foreach ($content as $key => $value) {
+             $content[$key]['question'] = substr(strip_tags($value['question']), 0, 200);
+         }*/
 
         return $content;
     }
@@ -262,7 +638,65 @@ class DemandeDevis extends Module
             Configuration::updateValue($key, Tools::getValue($key));
         }
     }
+    public function processSaveQuestion()
+    {
+        if ($id_questionnaireDevis = Tools::getValue('id_questionnaireDevis'))
+            $info = new DemandeDevisQuestionaire((int) $id_questionnaireDevis);
+        else {
+            $info = new DemandeDevisQuestionaire();
+        }
 
+        $languages = Language::getLanguages(false);
+
+        $text  = array();
+        $text1 = array();
+
+        foreach ($languages AS $lang) {
+            $text1[$lang['id_lang']]=Tools::getValue('libelle_' . $lang['id_lang']);
+        }
+
+        $info->id_produit = (int)Tools::getValue('id_produit');
+        //$info->libelle   = Tools::getValue('libelle');
+        $info->libelle   = $text1;
+            $saved = $info->save();
+
+        if ($saved)
+            $this->html .= $this->renderFormDevis();
+        else
+            $this->html .= '<div class="alert alert-danger conf error">' . $this->l('An error occurred while attempting to save.') . '</div>';
+
+        return $this->html;
+
+    }
+    public function processSaveReponse()
+    {
+        if ($id_reponse_question = Tools::getValue('id_reponse_question'))
+            $info = new DemandeDevisReponseQuestionnaire((int) $id_reponse_question);
+        else {
+            $info = new DemandeDevisReponseQuestionnaire();
+        }
+
+        $languages = Language::getLanguages(false);
+
+        $text  = array();
+        $text1 = array();
+
+        foreach ($languages AS $lang) {
+            $text1[$lang['id_lang']]=Tools::getValue('libelle_' . $lang['id_lang']);
+        }
+
+        $info->id_questionnaireDevis = (int)Tools::getValue('id_questionnaireDevis');
+        $info->libelle   = $text1;
+        $saved = $info->save();
+
+        if ($saved)
+            $this->html .= $this->renderFormDevis();
+        else
+            $this->html .= '<div class="alert alert-danger conf error">' . $this->l('An error occurred while attempting to save.') . '</div>';
+
+        return $this->html;
+
+    }
     /**
     * Add the CSS & JavaScript files you want to be loaded in the BO.
     */
@@ -285,6 +719,7 @@ class DemandeDevis extends Module
 
     public function hookDisplayHome()
     {
-        /* Place your code here. */
-    }
+        $this->context->controller->addJS($this->_path.'/views/js/front.js');
+        $this->context->controller->addCSS($this->_path.'/views/css/front.css');
+    }/**/
 }

@@ -25,7 +25,7 @@
 */
 $sql = array();
 
-$sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'demandeDevis` (
+$sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'demandedevis` (
     `id_demandeDevis` int(11) NOT NULL AUTO_INCREMENT,
     `id_client` int(11) NOT NULL,
     `id_reponse_question` int(11) NOT NULL,
@@ -35,16 +35,29 @@ $sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'demandeDevis` (
 $sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'demandeDevisQuestionaire` (
     `id_questionnaireDevis` int(11) NOT NULL AUTO_INCREMENT,
     `id_produit` int(11) NOT NULL,
-    `libelle` varchar(255) DEFAULT NULL,
     PRIMARY KEY  (`id_questionnaireDevis`)
 ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
+$sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'demandeDevisquestionaire_lang` (
+  `id_questionnaireDevis` int(11) NOT NULL auto_increment,
+  `id_lang` int(11) NOT NULL ,
+  `libelle` text NOT NULL,
+  `created` datetime DEFAULT CURRENT_TIMESTAMP ,
+  `modified` datetime DEFAULT CURRENT_TIMESTAMP ,
+  PRIMARY KEY (`id_questionnaireDevis`,`id_lang`)
+) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8';
 $sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'demandeDevisReponse` (
     `id_reponse_question` int(11) NOT NULL AUTO_INCREMENT,
     `id_questionnaireDevis` int(11) NOT NULL,
-    `libelle` varchar(255) DEFAULT NULL,
     PRIMARY KEY  (`id_reponse_question`)
 ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
-
+$sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'demandeDevisReponse_lang` (
+  `id_reponse_question` int(11) NOT NULL auto_increment,
+  `id_lang` int(11) NOT NULL ,
+  `libelle` text NOT NULL,
+  `created` datetime DEFAULT CURRENT_TIMESTAMP ,
+  `modified` datetime DEFAULT CURRENT_TIMESTAMP ,
+  PRIMARY KEY (`id_reponse_question`,`id_lang`)
+) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8';
 foreach ($sql as $query) {
     if (Db::getInstance()->execute($query) == false) {
         return false;

@@ -12,7 +12,7 @@ class DemandeDevisModel extends ObjectModel
     public $id_reponse_question;
     public $id_client;
     public static $definition = array(
-        'table' => 'demandeDevis',
+        'table' => 'demandedevis',
         'primary' => 'id_demandeDevis',
         'multilang' => true,
         'fields' => array(
