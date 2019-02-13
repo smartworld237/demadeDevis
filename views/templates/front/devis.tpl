@@ -24,23 +24,40 @@
 *}
 {extends file='page.tpl'}
 {block name='content'}
-  <br class="container" id="url" data-search-controller-url="{$devis_controller_url}">
+  <div class="container" id="url" data-search-controller-url="{$devis_controller_url}">
     <header>
           <h1 class="h3">{l s='Send a Devis' d='Modules.demandedevis'}</h1>
           <p>{l s='If you would like to add a comment about your order, please write it in the field below.' d='Modules.Contactform.Shop'}</p>
       </header> {* *}
-      <button name="submitNewsletter" class="js-hide-modal1 btn btn-success" > text</button>
+      {*<button name="submitNewsletter" class="js-hide-modal1 btn btn-success" > text</button>*}
         <form action="{$urls.pages.index}" method="post">
-            <div class="form-group contener">
-                <label for="email" class="col-md-2 control-label">{l s='Product' d='Modules.demandedevis'}</label>
-                <div class="col-md-6">
-                <select name="id_order" class="dd_select">
+            <div class=" contener">
+                <div class="form-group col-md-6">
+                    <label for="pwd">Question 1</label>
+                    <input type="text" class="form-control" id="pwd1">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="pwd">Question 2</label>
+                    <input type="text" class="form-control" id="pwd2">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="pwd">Question 2</label>
+                    <input type="text" class="form-control" id="pwd3">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="pwd">Question 2</label>
+                    <input type="text" class="form-control" id="pwd4">
+                </div>
+                <div class="col-md-12">
+                    <label for="id_order" class="">{l s='Product' d='Modules.demandedevis'}</label>
+                <select name="id_order" class="form-control dd_select">
                     <option value="">{l s='Select reference' d='Modules.demandedevis'}</option>
                     {foreach from=$orders item=order}
                         <option value="{$order.id_product}">{$order.name}</option>
                     {/foreach}
-                </select></div>
-            </div>
+                </select>
+                </div>
+
 {*            <div class="form-group">
                 <label for="city" class="col-md-4 control-label">Ville :</label>
                 <div class="col-md-6">
@@ -51,7 +68,8 @@
           *}
            {* <input type="submit" value="ok" name="submitNewsletter" class="test btn btn-success" />*}
 
-            <input type="hidden" name="action" value="0" />
+            <button type="submit" class="btn btn-default">Submit</button>
+            </div>
         </form>
   </br> </br> </br> </br> </br> </br>
     </div>

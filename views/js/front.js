@@ -29,7 +29,7 @@ $(document).ready(function () {
     var $searchWidget = $('#url');
     //var $searchBox    = $("select[class=dd_select]", $element).val()
     var searchURL     = $searchWidget.attr('data-search-controller-url');
-    getQuestion(3);
+    //getQuestion(3);
     $('.dd_select').on('change',function(){
         var $searchBox    = $(".dd_select").val();
         //$( this ).val();
@@ -47,9 +47,9 @@ $(document).ready(function () {
                 console.log(resultat);
                 $( ".question" ).remove();
                 $.each( resultat, function( index, value ){
-               getQuestion(value.id_questionnaireDevis);
+
                     $('.contener').append('</br><div class="col-md-6 question" id="quest'+value.id_questionnaireDevis+'">'+value.libelle+'</div>');
-                                                  // Append the text to <h1>
+                    getQuestion(value.id_questionnaireDevis);
                 });
             },
 
@@ -70,6 +70,10 @@ $(document).ready(function () {
                 },
             success : function(resultats, statut){ // success est toujours en place, bien sûr !
                 console.log(resultats);
+                $('#quest'+question).append('<select class="col-md-6" id="response'+question+'">');
+               /* let $input=$(resultats).find('#response'+question);
+
+                $('#response'+question).replaceWith($input);*/
                 /*$.each( resultats, function( index, value ){
                     $('.contener').append('</br><div class="col-md-6 reponse" id="reponse'+value.id_questionnaireDevis+'">'+value.libelle+'</div>');
                     // Append the text to <h1>
@@ -98,30 +102,6 @@ $(document).ready(function () {
             error : function(resultat, statut, erreur){
 
             }
-
-        });
-    });
-    $('.test').each(function(){
-        $(this).on('click', function(){
-            alert("text");
-         /*   $.ajax({
-                url : '',
-                type : 'POST',
-                dataType : 'json',
-                data:{
-                    quantity:$('.num-product').val(),
-                    name:nameProduct
-                },
-                success : function(resultat, statut){ // success est toujours en place, bien sûr !
-                    console.log(resultat);
-                    swal(nameProduct, "is added to cart !", "success");
-                },
-
-                error : function(resultat, statut, erreur){
-
-                }
-
-            });*/
 
         });
     });
