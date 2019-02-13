@@ -498,7 +498,7 @@ class DemandeDevis extends Module
             'desc' => $this->l('Add new')
         );
 
-        $helper->title        = 'Questionnaire Devis';
+        $helper->title        = 'Reponses Questionnaire';
         $helper->table        = $this->name;
         $helper->token        = Tools::getAdminTokenLite('AdminModules');
         $helper->currentIndex = AdminController::$currentIndex . '&configure=' . $this->name;
@@ -663,7 +663,7 @@ class DemandeDevis extends Module
             $saved = $info->save();
 
         if ($saved)
-            $this->html .= $this->renderFormDevis();
+            $this->html .= $this->renderForm();
         else
             $this->html .= '<div class="alert alert-danger conf error">' . $this->l('An error occurred while attempting to save.') . '</div>';
 

@@ -30,8 +30,8 @@
           <p>{l s='If you would like to add a comment about your order, please write it in the field below.' d='Modules.Contactform.Shop'}</p>
       </header> {* *}
       {*<button name="submitNewsletter" class="js-hide-modal1 btn btn-success" > text</button>*}
-        <form action="{$urls.pages.index}" method="post">
-            <div class=" contener">
+        <form class="form" action="{$urls.pages.index}" method="post">
+            <div class="contener">
                 <div class="form-group col-md-6">
                     <label for="pwd">Question 1</label>
                     <input type="text" class="form-control" id="pwd1">
@@ -68,8 +68,11 @@
           *}
            {* <input type="submit" value="ok" name="submitNewsletter" class="test btn btn-success" />*}
 
-            <button type="submit" class="btn btn-default">Submit</button>
+
             </div>
+<div class="row container">
+    <button type="submit" class="btn btn-default pull-right" style="margin-top: 15px">Submit</button>
+</div>
         </form>
   </br> </br> </br> </br> </br> </br>
     </div>

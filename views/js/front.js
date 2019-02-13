@@ -70,7 +70,13 @@ $(document).ready(function () {
                 },
             success : function(resultats, statut){ // success est toujours en place, bien sûr !
                 console.log(resultats);
-                $('#quest'+question).append('<select class="col-md-6" id="response'+question+'">');
+                $('#quest'+question).append('<select class="form-control" id="response'+question+'">');
+               // $('#quest'+question).append("<option value='"+res[i].id_fonction+"'>" + res[i].lib_fonction);
+                $.each( resultats, function( index, value ){
+                   // alert(value.id_reponse_question);
+                    //$('#reponse'+question).append("<a>");
+                    $('#response'+question).append("<option value='"+value.id_reponse_question+"'>" + value.libelle);
+                });
                /* let $input=$(resultats).find('#response'+question);
 
                 $('#response'+question).replaceWith($input);*/
