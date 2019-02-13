@@ -29,8 +29,10 @@
           <h1 class="h3">{l s='Send a Devis' d='Modules.demandedevis'}</h1>
           <p>{l s='If you would like to add a comment about your order, please write it in the field below.' d='Modules.Contactform.Shop'}</p>
       </header> {* *}
+      {if $notification}<p>{$notification}</p> {/if}
+      {if $test}<p>{$test}</p> {/if}
       {*<button name="submitNewsletter" class="js-hide-modal1 btn btn-success" > text</button>*}
-        <form class="form" action="{$urls.pages.index}" method="post">
+        <form class="form" action="{$controller}" method="post">
             <div class="contener">
                 <div class="form-group col-md-6">
                     <label for="pwd">Question 1</label>
@@ -71,9 +73,11 @@
 
             </div>
 <div class="row container">
-    <button type="submit" class="btn btn-default pull-right" style="margin-top: 15px">Submit</button>
+    <input type="hidden" name="size" id="size" />
+    <input type="hidden" name="idquestion" id="idquestion" />
+    <button type="submit" name="submitMessage" class="btn btn-default pull-right" style="margin-top: 15px">Submit</button>
 </div>
-        </form>
-  </br> </br> </br> </br> </br> </br>
-    </div>
+        </form></div>
+  </br>
+
 {/block}

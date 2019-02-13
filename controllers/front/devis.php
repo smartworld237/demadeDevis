@@ -18,18 +18,29 @@ class DemandeDevisdevisModuleFrontController extends ModuleFrontController
         $this->variables['value'] = Tools::getValue('email', '');
         $this->variables['msg'] = 'test';
         $this->variables['conditions'] = Configuration::get('NW_CONDITIONS', $this->context->language->id);
+        $responses = DemandeDevisQuestionaire::getQuestionnaireByProduit((int)Tools::getValue('id_product'),$this->context->language->id);
 
 
-        /*if (Tools::isSubmit('submitNewsletter')) {
-                    $this->module->newsletterRegistration();
-                    if ($this->module->error) {
-                        $this->variables['msg'] = $this->module->error;
-                        $this->variables['nw_error'] = true;
-                    } elseif ($this->module->valid) {
-                        $this->variables['msg'] = $this->module->valid;
-                        $this->variables['nw_error'] = false;
-                    }
+        if (Tools::isSubmit('submitdevis')) {
+            $customer = $this->context->customer;
+               /* for ($i=0;$i<=Tools::getValue('size');$i++){
+
                 }*/
+               foreach ($responses as $question){
+                   $devis=new DemandeDevisModel();
+                   $devis->id_client=$customer->id;
+
+                   $resp=(int)Tools::getValue('response'.$question->id_questionnaireDevis);
+                   if($resp){
+                       $devis->id_reponse_question=$resp;
+                       $devis->save();
+                       $this->context->smarty->assign(array('notification'=>'valider'));
+                   }else{
+                       $this->context->smarty->assign(array('notification'=>'ereur'));
+                   }
+
+            }
+                }
     }
     /**
      * @see FrontController::initContent()
@@ -37,10 +48,11 @@ class DemandeDevisdevisModuleFrontController extends ModuleFrontController
     public function initContent()
     {
         parent::initContent();
-        $parameters = array("action" => "action_name");
+        $parameters = array();
         $this->context->smarty->assign(array(
             'orders' => $this->getProducts(),
             'test' => 'reza',
+            'controller'=>$this->context->link->getPageLink('devis'),
             'devis_controller_url' => $this->context->link->getModuleLink('demandedevis','devis',$parameters)
         ));
         $this->variables['products'] = $this->getProducts();
@@ -53,6 +65,30 @@ class DemandeDevisdevisModuleFrontController extends ModuleFrontController
                 //  $response=Product::getSimpleProducts($this->context->language->id);
                 $json = Tools::jsonEncode($response);
                 $this->ajaxDie($json);
+        }else if (Tools::getValue('action_name')){
+            $response = DemandeDevisQuestionaire::getQuestionnaireByProduit((int)Tools::getValue('id_product'),$this->context->language->id);
+            // Classic json response
+            $json = Tools::jsonEncode($response);
+            $this->ajaxDie($json);
+        }else if (Tools::isSubmit('submitMessage')){
+           // $this->context->smarty->assign(array('notification'=>'ereur'));
+            $customer = $this->context->customer;
+            $responses = DemandeDevisQuestionaire::getQuestionnaireByProduit((int)Tools::getValue('id_product'),$this->context->language->id);
+            $this->context->smarty->assign(array('notification'=>'test'));
+            foreach ($responses as $question){
+                $devis=new DemandeDevisModel();
+                $devis->id_client=$customer->id;
+
+                $resp=(int)Tools::getValue('response'.$question->id_questionnaireDevis);
+                if($resp){
+                    $devis->id_reponse_question=$resp;
+                    $devis->save();
+                    $this->context->smarty->assign(array('notification'=>'valider'));
+                }else{
+                    $this->context->smarty->assign(array('notification'=>'ereur'));
+                }
+
+            }
         }
         /*switch (Tools::getValue('reponse')) {
             case 'action_reponse':

@@ -24,4 +24,10 @@ class DemandeDevisModel extends ObjectModel
         ),
 
     );
+    public function add($autodate = true, $null_values = false){
+        if (!parent::add($autodate, $null_values)) {
+            return false;
+        }
+        return true;
+    }
 }

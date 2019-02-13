@@ -46,9 +46,11 @@ $(document).ready(function () {
             success : function(resultat, statut){ // success est toujours en place, bien sûr !
                 console.log(resultat);
                 $( ".question" ).remove();
+                $('#size').text(resultat.length);
+                $('#idquestion').text(resultat.length);
                 $.each( resultat, function( index, value ){
 
-                    $('.contener').append('</br><div class="col-md-6 question" id="quest'+value.id_questionnaireDevis+'">'+value.libelle+'</div>');
+                    $('.contener').append('</br><div class="col-md-6 question" id="quest'+value.id_questionnaireDevis+'"><label>'+value.libelle+'</label></div>');
                     getQuestion(value.id_questionnaireDevis);
                 });
             },
@@ -70,7 +72,7 @@ $(document).ready(function () {
                 },
             success : function(resultats, statut){ // success est toujours en place, bien sûr !
                 console.log(resultats);
-                $('#quest'+question).append('<select class="form-control" id="response'+question+'">');
+                $('#quest'+question).append('<select class="form-control" name="response'+question+'" id="response'+question+'">');
                // $('#quest'+question).append("<option value='"+res[i].id_fonction+"'>" + res[i].lib_fonction);
                 $.each( resultats, function( index, value ){
                    // alert(value.id_reponse_question);
